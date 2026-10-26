@@ -1,0 +1,642 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/cores/esp32"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/variants/esp32s3"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "GxEPD2_BW.h",
+    "Includepath": "/home/cheeto/Arduino/libraries/GxEPD2/src"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "Adafruit_GFX.h",
+    "Includepath": "/home/cheeto/Arduino/libraries/Adafruit_GFX_Library"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "Adafruit_I2CDevice.h",
+    "Includepath": "/home/cheeto/Arduino/libraries/Adafruit_BusIO"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/Wire/src"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "SPI.h",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SPI/src"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "FS.h",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/FS/src"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "SD.h",
+    "Includepath": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SD/src"
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/flippy/build/sketch/flippy.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/GxEPD2_EPD.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_102.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_1160_T91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_1248.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_150_BN.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_154.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_154_D67.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_154_M09.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_154_M10.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_154_T8.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_B72.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_B73.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_B74.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_BN.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_M21.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_T5D.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_213_flex.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_260.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_260_M01.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_266_BN.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_270.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_BS.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_I6FD.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_M06.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_T5.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_T5D.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_T94.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_290_T94_V2.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_370_TC1.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_371.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_420.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_420_M01.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_583.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_583_T8.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_750.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd/GxEPD2_750_T7.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_1248c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_154_Z90c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_154c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_213_Z19c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_213_Z98c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_213c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_266c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_270c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_290_C90c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_290_Z13c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_290c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_420c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_420c_Z21.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_583c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_583c_Z83.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_750c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_750c_GDEW075Z08.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_750c_Z08.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd3c/GxEPD2_750c_Z90.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_1160c_GDEY116F51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_154c_GDEM0154F51H.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_213c_GDEY0213F51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_266c_GDEY0266F51H.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_290c_GDEY029F51H.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_300c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_350c_GDEM035F51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_397c_GDEM0397F81.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_420c_GDEY0420F51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_437c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_579c_GDEY0579F51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd4c/GxEPD2_750c_GDEM075F52.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd7c/GxEPD2_565c.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd7c/GxEPD2_565c_GDEP0565D90.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd7c/GxEPD2_730c_ACeP_730.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd7c/GxEPD2_730c_GDEP073E01.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/epd7c/GxEPD2_730c_GDEY073D46.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdem/GxEPD2_1020_GDEM102T91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdem/GxEPD2_1085_GDEM1085T51.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdem/GxEPD2_1330_GDEM133T91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdem/GxEPD2_397_GDEM0397T81.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdem3c/GxEPD2_1330c_GDEM133Z91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdeq/GxEPD2_310_GDEQ031T10.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdeq/GxEPD2_426_GDEQ0426T82.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdeq/GxEPD2_583_GDEQ0583T31.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdeq3c/GxEPD2_583c_GDEQ0583Z31.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_154_GDEY0154D67.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_213_GDEY0213B74.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_266_GDEY0266T90.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_270_GDEY027T91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_290_GDEY029T71H.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_290_GDEY029T94.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_370_GDEY037T03.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_420_GDEY042T81.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_579_GDEY0579T93.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey/GxEPD2_750_GDEY075T7.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey3c/GxEPD2_1160c_GDEY116Z91.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey3c/GxEPD2_420c_GDEY042Z98.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey3c/GxEPD2_579c_GDEY0579Z93.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/gdey3c/GxEPD2_750c_GDEY075Z08.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it103_1872x1404.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it60.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it60_1448x1072.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it78_1872x1404.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/other/GxEPD2_420_GYE042A87.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/GxEPD2/src/other/GxEPD2_420_SE0420NQ04.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_GFX_Library/Adafruit_GFX.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_GFX_Library/Adafruit_GrayOLED.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_GFX_Library/Adafruit_SPITFT.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_GFX_Library/glcdfont.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_BusIO/Adafruit_BusIO_Register.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_BusIO/Adafruit_GenericDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_BusIO/Adafruit_I2CDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/Arduino/libraries/Adafruit_BusIO/Adafruit_SPIDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/Wire/src/Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SPI/src/SPI.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/FS/src/FS.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/FS/src/vfs_api.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SD/src/SD.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SD/src/sd_diskio.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/cheeto/.arduino15/packages/esp32/hardware/esp32/3.3.7/libraries/SD/src/sd_diskio_crc.c",
+    "Include": "",
+    "Includepath": null
+  }
+]
