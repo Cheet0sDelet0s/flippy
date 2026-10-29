@@ -10,16 +10,17 @@
 # 10 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 # 11 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 # 12 "/home/cheeto/Arduino/flippy/flippy.ino" 2
+# 13 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 
 // esp32 specific
-# 15 "/home/cheeto/Arduino/flippy/flippy.ino" 2
+# 16 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 
 
 
-# 19 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 # 20 "/home/cheeto/Arduino/flippy/flippy.ino" 2
+# 21 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 
-# 22 "/home/cheeto/Arduino/flippy/flippy.ino" 2
+# 23 "/home/cheeto/Arduino/flippy/flippy.ino" 2
 
 const bool DEBUG = false; // whether to do debug serial and stuff. will make everything run very badly if true
 
@@ -59,11 +60,24 @@ const float lipoVoltages[NUM_POINTS] = {3.27, 3.60, 3.70, 3.76, 3.79, 3.82, 3.87
 const int lipoPercentages[NUM_POINTS] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
 
 struct Menu {
+ int id; // what number refers to this menu
  char *imgPath; // path on sd card to the menu image
  int linkedMenus[4]; // what each button should transition that menu to (-1 means special logic)
  bool drawCornerStats; // draw time, battery, time since last sync and cards due in top right
  bool drawTopLeftBattery; // draw big battery percentage in top left (used for sleep menu)
+ bool listMenu; // whether this menu is a generic list menu or not
+ bool flashcard; // whether menu is flashcard menu or not
 };
+
+struct Flashcard {
+    String question;
+    String answer;
+};
+
+const int MAX_FLASHCARDS = 200;
+
+Flashcard flashcards[MAX_FLASHCARDS];
+int flashcardCount = 0;
 
 constexpr gpio_num_t wakePins[] = {
  GPIO_NUM_1,
@@ -75,7 +89,7 @@ constexpr gpio_num_t wakePins[] = {
 
 constexpr gpio_num_t deepWakePin = GPIO_NUM_1;
 
-constexpr uint64_t SLEEP_TIME_US = 1ULL * 60 * 1000000;
+constexpr uint64_t SLEEP_TIME_US = 3ULL * 60 * 1000000;
 
 int buttons[] = {
  1,
@@ -85,14 +99,21 @@ int buttons[] = {
  2
 };
 
-Menu menus[6] = {
- {"/assets/sleeping/sleeping.bin", {0, 0, 0, 0}, false, true}, // 0 sleep menu
- {"/assets/mainmenu/mainmenu.bin", {2, 3, 4, 5}, true, false}, // 1 main menu
- {"/assets/revise/revise.bin", {1, 1, 1, 1}, true, false}, // 2 revise menu
- {"/assets/read/read.bin", {1, 1, 1, 1}, true, false}, // 3 read menu
- {"/assets/sync/sync.bin", {1, 1, 1, 1}, true, false}, // 4 sync menu
- {"/assets/settings/settings.bin", {1, 1, 1, 1}, true, false} // 5 settings menu
+Menu menus[] = {
+ {0, "/assets/sleeping/sleeping.bin", {0, 0, 0, 0}, false, true, false, false}, // 0 sleep menu
+ {1, "/assets/mainmenu/mainmenu.bin", {2, 3, 4, 5}, true, false, false, false}, // 1 main menu
+
+ {2, "/assets/revise/revise.bin", {1, 22, 1, 1}, true, false, false, false}, // 2 revise menu
+ {22, "/assets/general/listmenu.bin", {0,0,0,0}, true, false, true, false}, // 2.2 revise->browse
+
+ {3, "/assets/read/read.bin", {1, 1, 1, 1}, true, false, false, false}, // 3 read menu
+ {4, "/assets/sync/sync.bin", {1, 1, 1, 1}, true, false, false, false}, // 4 sync menu
+ {5, "/assets/settings/settings.bin", {1, 1, 1, 1}, true, false, false, false}, // 5 settings menu
+ {6, "/assets/general/flashcardQuestion.bin", {0,0,0,0}, false, false, false, true}, // 6 flashcard question side
+ {7, "/assets/general/flashcardAnswer.bin", {0,0,0,0}, false, false, false, true}, // 7 flashcard answer side
 };
+
+int menuCount = sizeof(menus) / sizeof(menus[0]);
 
 //display object
 GxEPD2_BW<GxEPD2_370_GDEY037T03, GxEPD2_370_GDEY037T03::HEIGHT> display(GxEPD2_370_GDEY037T03(9, 18, 17, 35)); // GDEY037T03 240x416, UC8253
@@ -110,14 +131,407 @@ int menuIndex = 0;
 int currentMenu = 1; // 0 = SLEEP   1 = MAIN MENU
 int menuLength = 4; // not used currently
 
-char* menuToPath() {
- return menus[currentMenu].imgPath;
+int refreshLevel = 3;
+
+String listMenu[4] = {
+ "back",
+ "2",
+ "3",
+ "down"
+};
+
+String currentDirectory = "/sync/";
+bool finishedDirectory = false;
+
+bool loadFlashcards(const String& folderPath) {
+    flashcardCount = 0;
+
+    scanDirectory(folderPath);
+
+ if (DEBUG) {
+  HWCDCSerial.printf(
+   "Loaded %d flashcards from %s\n",
+   flashcardCount,
+   folderPath.c_str()
+  );
+
+  for (int i = 0; i < flashcardCount; i++) {
+   HWCDCSerial.print("Q: ");
+   HWCDCSerial.print(flashcards[i].question);
+   HWCDCSerial.print(" A: ");
+   HWCDCSerial.println(flashcards[i].answer);
+  }
+ }
+
+    return flashcardCount > 0;
 }
 
-void handleMenuButton(int button) {
+void scanDirectory(const String& path) {
+    File dir = SD.open(path.c_str());
+
+    if (!dir || !dir.isDirectory()) {
+        HWCDCSerial.printf("Cannot open directory: %s\n", path.c_str());
+
+        if (dir) {
+            dir.close();
+        }
+
+        return;
+    }
+
+    File entry = dir.openNextFile();
+
+    while (entry) {
+        // Build the full path before closing the entry
+        String fullPath = path;
+
+        if (!fullPath.endsWith("/")) {
+            fullPath += "/";
+        }
+
+        fullPath += entry.name();
+
+        bool isDir = entry.isDirectory();
+        String filename = String(entry.name());
+        filename.toLowerCase();
+
+        entry.close();
+
+        if (isDir) {
+            scanDirectory(fullPath);
+        } else if (filename.endsWith(".md")) {
+            File markdownFile = SD.open(fullPath.c_str(), "r");
+
+            if (markdownFile) {
+                HWCDCSerial.printf("Reading: %s\n", fullPath.c_str());
+                parseMarkdownFile(markdownFile);
+                markdownFile.close();
+    HWCDCSerial.print("Flashcard count is now ");
+    HWCDCSerial.println(flashcardCount);
+            }
+        }
+
+        entry = dir.openNextFile();
+    }
+
+    dir.close();
+}
+
+void parseMarkdownFile(File file) {
+    while (file.available()) {
+        String line = file.readStringUntil('\n');
+        line.trim();
+
+        // Skip empty lines
+        if (line.length() == 0) {
+            continue;
+        }
+
+        // Find the question/answer separator
+        int separator = line.indexOf("::");
+
+        if (separator == -1) {
+            continue;
+        }
+
+        // Stop if the array is full
+        if (flashcardCount >= MAX_FLASHCARDS) {
+            HWCDCSerial.println("Flashcard array is full!");
+            return;
+        }
+
+        String question = line.substring(0, separator);
+        String answer = line.substring(separator + 2);
+
+        question.trim();
+        answer.trim();
+
+        // Don't add empty cards
+        if (question.length() == 0 || answer.length() == 0) {
+            continue;
+        }
+
+        flashcards[flashcardCount].question = question;
+        flashcards[flashcardCount].answer = answer;
+
+        flashcardCount++;
+    }
+}
+
+String trimString(String text) {
+    text.trim();
+    return text;
+}
+
+void goUpDirectory(String* path) {
+    if (path->length() <= 1) return;
+
+    path->remove(path->lastIndexOf('/', path->length() - 2) + 1);
+}
+
+void setListMenuToDir(String dirname) {
+    File dir = SD.open(dirname);
+
+    if (!dir || !dir.isDirectory()) {
+        HWCDCSerial.println("Failed to open directory");
+        return;
+    }
+
+ if (menuIndex == 0) {
+  listMenu[0] = "back";
+ } else {
+  listMenu[0] = "up";
+ }
+
+ listMenu[1] = "";
+ listMenu[2] = "";
+
+ File entry = dir.openNextFile();
+ int filesFound = 0;
+
+ for (int i = 0; i < menuIndex; i++) {
+  entry = dir.openNextFile();
+ }
+
+    while (entry && filesFound < 2) {
+  String name = entry.name();
+  if (name.charAt(0) != '.') {
+   listMenu[1 + filesFound] = entry.name();
+
+   filesFound++;
+   HWCDCSerial.println(entry.name());
+  }
+
+        entry.close();
+
+  if (filesFound < 2) {
+   entry = dir.openNextFile();
+  }
+    }
+
+ if (dir.openNextFile()) { // whether there are more files to open or if we have hit the end of the directory
+  finishedDirectory = false;
+  listMenu[3] = "down";
+ } else {
+  finishedDirectory = true; // dir.openNextFile() == false so no more files
+  listMenu[3] = "";
+ }
+
+    dir.close();
+}
+
+void drawFlashcard() {
+ display.setPartialWindow(0, 0, display.width(), display.height());
+
+ display.firstPage();
+ do {
+
+  display.setTextColor(0x0000);
+  drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
+
+  display.setFont(&Lora_Italic_VariableFont_wght7pt7b);
+  printInBox(currentDirectory + " | Q" + String(menuIndex), 10, 20, 365, 30);
+
+  display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
+  if (currentMenu == 6) {
+            //display.print(flashcards[menuIndex].question);
+   printInBox(flashcards[menuIndex].question, 10, 50, 365, 140);
+        } else {
+            printInBox(flashcards[menuIndex].answer, 10, 50, 365, 140);
+        }
+ } while (display.nextPage());
+
+ HWCDCSerial.println(flashcards[menuIndex].question);
+}
+
+void drawListMenu() {
+ display.setPartialWindow(0, 0, display.width(), display.height());
+    display.setFont(&Lora_Italic_VariableFont_wght28pt7b);
+
+    // Draw background
+    display.firstPage();
+    do {
+        drawBinaryImage(
+            menuToPath(),
+            0, 0,
+            display.width(),
+            display.height()
+        );
+    } while (display.nextPage());
+
+    // Draw menu text
+    for (int i = 0; i < 4; i++) {
+        const int y = 50 + 60 * i;
+        const int windowY = 9 + 60 * i;
+
+        display.setPartialWindow(43, windowY, 281, 42);
+        display.firstPage();
+        do {
+            display.fillRect(43, windowY, 281, 42, 0xFFFF);
+            display.setCursor(44, y);
+            display.print(listMenu[i]);
+        } while (display.nextPage());
+    }
+}
+
+Menu getMenu(int id) {
+ for (int i = 0; i < menuCount; i++) {
+  if (menus[i].id == id) {
+   return menus[i];
+  }
+ }
+}
+
+void printInBox(String text, int x, int y, int w, int h) {
+  int cursorX = x;
+  int cursorY = y;
+
+  int16_t x1, y1;
+  uint16_t textW, textH;
+
+  String word = "";
+  String line = "";
+
+  // Get the current font's line height
+  display.getTextBounds("Ag", 0, 0, &x1, &y1, &textW, &textH);
+  int lineHeight = textH + 2;
+
+  // Process each character, building words
+  for (int i = 0; i <= text.length(); i++) {
+    char c = (i < text.length()) ? text[i] : ' ';
+
+    if (c != ' ' && c != '\n' && c != '\t') {
+      word += c;
+      continue;
+    }
+
+    if (word.length() > 0) {
+      String testLine = line;
+      if (testLine.length() > 0) testLine += " ";
+      testLine += word;
+
+      display.getTextBounds(testLine, 0, 0,
+                             &x1, &y1, &textW, &textH);
+
+      if (textW > w && line.length() > 0) {
+        // Print the existing line and start a new one
+        display.setCursor(cursorX, cursorY);
+        display.print(line);
+
+        cursorY += lineHeight;
+        line = word;
+      } else {
+        line = testLine;
+      }
+
+      word = "";
+    }
+
+    if (c == '\n') {
+      if (line.length() > 0) {
+        display.setCursor(cursorX, cursorY);
+        display.print(line);
+        line = "";
+      }
+
+      cursorY += lineHeight;
+    }
+
+    // Stop if the next line would exceed the box
+    if (cursorY + lineHeight > y + h) {
+      return;
+    }
+  }
+
+  // Print the final line
+  if (line.length() > 0 && cursorY + lineHeight <= y + h) {
+    display.setCursor(cursorX, cursorY);
+    display.print(line);
+  }
+}
+
+char* menuToPath() {
+ return getMenu(currentMenu).imgPath;
+}
+
+void handleMenuButton(int button) { // big boy function (for big boys only)
  HWCDCSerial.print("current menu was ");
  HWCDCSerial.println(currentMenu);
- currentMenu = menus[currentMenu].linkedMenus[button - 1];
+
+ Menu m = getMenu(currentMenu);
+
+ if (m.listMenu) { // is a list menu
+  switch(button) {
+   case 1:
+    if (listMenu[0] == "back") {
+     if (currentDirectory == "/sync/") {
+      currentMenu = 1;
+     } else {
+      goUpDirectory(&currentDirectory);
+     }
+    } else if (menuIndex != 0) {
+     menuIndex -= 2;
+    }
+    break;
+   case 2:
+    currentDirectory = currentDirectory + listMenu[1] + "/";
+    menuIndex = 0;
+    break;
+   case 3:
+    currentDirectory = currentDirectory + listMenu[2] + "/";
+    menuIndex = 0;
+    break;
+   case 4:
+    if (listMenu[3] == "down") {
+     menuIndex += 2;
+    }
+    break;
+   case 43: // LMAO this is so fucked. 43 means both button 4 and 3 is pressed
+    loadFlashcards(currentDirectory);
+    currentMenu = 6;
+    menuIndex = 0;
+  }
+ } else if (m.flashcard) { // is a flashcard menu
+
+  switch(m.id) { // this is dumb as fuck but i cant be bothered to do anything else <3
+   case 6: // whether this is the question side
+    switch(button) { // im crine theres another switch statement
+     case 1: // flip card button
+      currentMenu = 7;
+      break;
+     case 2: // hint button (not implemented yet)
+      break;
+     case 4: // home button
+      currentMenu = 1;
+      menuIndex = 0;
+      break;
+    }
+    break;
+   case 7:
+    switch(button) { // more switch statements, just for you <3
+     case 1: // flip card button
+      currentMenu = 6;
+      break;
+     case 2: // correct button
+      menuIndex += 1; // advance to next flashcard
+      currentMenu = 6; // go back to question side
+      break;
+     case 3: // incorrect button HAH idiot
+      menuIndex += 1; // same as correct button
+      currentMenu = 6;
+      break;
+     case 4: // home button
+      currentMenu = 1;
+      menuIndex = 0;
+      break;
+    }
+    break;
+  }
+
+ } else {
+  currentMenu = getMenu(currentMenu).linkedMenus[button - 1];
+ }
+
  HWCDCSerial.print("it is now ");
  HWCDCSerial.println(currentMenu);
 }
@@ -161,8 +575,9 @@ int readBattery() { // scuffed battery voltage read + convert to percentage. no 
   for (int i = 0; i < SAMPLES; i++) {
 
  int v = analogRead(7);
- float adcVoltage = (v / 4095.0f) * 1.95f;
-
+ HWCDCSerial.println(v);
+ float adcVoltage = (float(map(v, 0, 4095, 15, 245)) / 100.00f) * 1.4f;
+ HWCDCSerial.println(adcVoltage);
     totalVoltage += adcVoltage;
   }
 
@@ -195,28 +610,24 @@ int readBattery() { // scuffed battery voltage read + convert to percentage. no 
 }
 
 void leveledRefresh(int refreshLevel) { // custom screen refresh to bypass seizure-inducing
- // display.firstPage();				 // refresh built into display controller
- // do {
- // 	display.fillScreen(GxEPD_WHITE);
- // } while (display.nextPage());
+ display.firstPage(); // refresh built into display controller
+ do {
+  display.fillScreen(0xFFFF);
+ } while (display.nextPage());
 
- // if (refreshLevel > 1) {
- // 	display.firstPage();
- // 	do {
- // 		display.fillScreen(GxEPD_BLACK);
- // 	} while (display.nextPage());
+ if (refreshLevel > 1) {
+  display.firstPage();
+  do {
+   display.fillScreen(0x0000);
+  } while (display.nextPage());
 
- // 	if (refreshLevel > 2) {
- // 		display.firstPage();
- // 		do {
- // 			display.fillScreen(GxEPD_WHITE);
- // 		} while (display.nextPage());
- // 	}
- // }
-
- display.fillScreen(0xFFFF);
- display.fillScreen(0x0000);
- display.fillScreen(0xFFFF);
+  if (refreshLevel > 2) {
+   display.firstPage();
+   do {
+    display.fillScreen(0xFFFF);
+   } while (display.nextPage());
+  }
+ }
 }
 
 void drawCornerStats() {
@@ -270,7 +681,7 @@ void setup()
  display.init(0, false, 50, false);
  HWCDCSerial.println("inited display");
 
- analogSetAttenuation(ADC_6db);
+ analogSetAttenuation(ADC_11db);
 
  display.setRotation(3);
  display.setFont(&FreeMonoBold9pt7b);
@@ -319,6 +730,8 @@ void setup()
 
  drawCornerStats();
 
+ setListMenuToDir("/sync/");
+
  HWCDCSerial.println("setup finished");
  HWCDCSerial.flush();
 }
@@ -329,10 +742,10 @@ void setRTCToCompileTime() {
  int hour, minute, second;
 
  // Parse compile date, e.g. "Oct 21 2026"
- sscanf("Oct 26 2026", "%3s %d %d", monthStr, &day, &year);
+ sscanf("Oct 29 2026", "%3s %d %d", monthStr, &day, &year);
 
  // Parse compile time, e.g. "17:57:00"
- sscanf("14:26:07", "%d:%d:%d", &hour, &minute, &second);
+ sscanf("20:41:42", "%d:%d:%d", &hour, &minute, &second);
 
  const char* months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -376,6 +789,23 @@ uint8_t decToBcd(uint8_t val) {
 
 uint8_t bcdToDec(uint8_t bcd) {
   return ((bcd >> 4) * 10) + (bcd & 0x0F);
+}
+
+long long concat(long long a, long long b) {
+    long long multiplier = 1;
+    long long temp = b;
+
+    // Handle the case where the second number is 0
+    if (b == 0) {
+        multiplier = 10;
+    } else {
+        while (temp > 0) {
+            multiplier *= 10;
+            temp /= 10;
+        }
+    }
+
+    return a * multiplier + b;
 }
 
 void updateTime() {
@@ -435,26 +865,26 @@ void lightSleep() {
 
  // Enable wake-up when any pin goes LOW
  for (gpio_num_t pin : wakePins) {
-  do { esp_err_t err_rc_ = (gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 437, 
-# 437 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+  do { esp_err_t err_rc_ = (gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 867, 
+# 867 "/home/cheeto/Arduino/flippy/flippy.ino" 3
  __PRETTY_FUNCTION__
-# 437 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 867 "/home/cheeto/Arduino/flippy/flippy.ino"
  , "gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)"); } } while(0)
 
    ;
  }
 
- do { esp_err_t err_rc_ = (esp_sleep_enable_gpio_wakeup()); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 442, 
-# 442 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_gpio_wakeup()); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 872, 
+# 872 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 442 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 872 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_gpio_wakeup()"); } } while(0);
 
  // Also wake after five minutes
- do { esp_err_t err_rc_ = (esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 445, 
-# 445 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 875, 
+# 875 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 445 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 875 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)"); } } while(0)
 
   ;
@@ -488,16 +918,20 @@ void deepSleep() {
  rtc_gpio_pulldown_dis(deepWakePin);
 
  // Wake when the pin is LOW
- do { esp_err_t err_rc_ = (esp_sleep_enable_ext0_wakeup(deepWakePin, 0)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 478, 
-# 478 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_ext0_wakeup(deepWakePin, 0)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 908, 
+# 908 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 478 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 908 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_ext0_wakeup(deepWakePin, 0)"); } } while(0);
  esp_deep_sleep_start();
  // program never continues from here as deep sleep does not preserve RAM
 }
 
 void loop() {
+ while (digitalRead(1) == 0x0) {
+  delay(50);
+ }
+
  static bool shouldLightSleep = true;
 
  display.hibernate();
@@ -527,27 +961,43 @@ void loop() {
             break;
     }
 
- int refreshLevel = 3;
+ delay(100); // to allow time for multi button presses
 
  if (buttonPressed) {
   int pressedPin = 0;
+  int secondPin = 0;
 
   // Print which pins are LOW after waking
   for (gpio_num_t pin : wakePins) {
    if (digitalRead((uint8_t)pin) == 0x0) {
-    pressedPin = (int)pin;
-    HWCDCSerial.print("pressed pin is ");
-    HWCDCSerial.println(pin);
-    break;
+    if (pressedPin == 0) { // if we have not found the first pressed button yet
+     pressedPin = (int)pin;
+     HWCDCSerial.print("pressed pin is ");
+     HWCDCSerial.println(pin);
+    } else {
+     secondPin = (int)pin; // if we have found a first pressed button
+     HWCDCSerial.print("second pin is ");
+     HWCDCSerial.println(pin);
+    }
+
    }
   }
 
-  int pressedButton = -1;
+  int pressedButton = -1; // when multiple buttons are pressed, the button read will be the bigger number button before the smaller one. eg 32 for 3 and 2, 43 for 4 and 3.
+  int secondButton = -1;
 
   for (int i = 0; i < 6; i++) {
    if (pressedPin == buttons[i]) {
     pressedButton = i;
+   } else if (secondPin == buttons [i]) {
+    secondButton = i;
    }
+  }
+
+  if (secondButton != -1) {
+   HWCDCSerial.println("second button pressed");
+
+   pressedButton = concat(pressedButton, secondButton);
   }
 
   if (pressedButton == 0) { // power button
@@ -587,20 +1037,29 @@ void loop() {
 
  HWCDCSerial.println(menuToPath());
 
- display.firstPage();
- do {
-  drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
+ Menu m = getMenu(currentMenu);
 
-  if (menus[currentMenu].drawTopLeftBattery) {
-   display.setCursor(0, 74);
-   display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
-   display.print(String(batteryPercentage) + "%");
+ if (!m.listMenu && !m.flashcard) {
+  display.firstPage();
+  do {
+   drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
+
+   if (m.drawTopLeftBattery) {
+    display.setCursor(0, 74);
+    display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
+    display.print(String(batteryPercentage) + "%");
+   }
+
+  } while (display.nextPage());
+
+  if (m.drawCornerStats) {
+   drawCornerStats();
   }
-
- } while (display.nextPage());
-
- if (menus[currentMenu].drawCornerStats) {
-  drawCornerStats();
+ } else if (!m.flashcard) { // menu is a listMenu so requires special handling
+  setListMenuToDir(currentDirectory);
+  drawListMenu();
+ } else { // menu is flashcard so requires special handling
+  drawFlashcard();
  }
-
 }
+// hmm

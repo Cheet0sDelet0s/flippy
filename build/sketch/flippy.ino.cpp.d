@@ -251,6 +251,7 @@
  /home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it78_1872x1404.h \
  /home/cheeto/Arduino/libraries/GxEPD2/src/it8951/GxEPD2_it103_1872x1404.h \
  /home/cheeto/Arduino/libraries/Adafruit_GFX_Library/Fonts/FreeMonoBold9pt7b.h \
+ /home/cheeto/Arduino/flippy/Lora_Italic_VariableFont_wght28pt7b.h \
  /home/cheeto/Arduino/flippy/Lora_Italic_VariableFont_wght15pt7b.h \
  /home/cheeto/Arduino/flippy/Lora_Italic_VariableFont_wght10pt7b.h \
  /home/cheeto/Arduino/flippy/Lora_Italic_VariableFont_wght7pt7b.h \
