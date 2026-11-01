@@ -55,6 +55,16 @@ const bool DEBUG = false; // whether to do debug serial and stuff. will make eve
 #define R1 100000 // ohms
 #define R2 100000 // ohms
 
+// syncing
+#define UART_RX_PIN  44
+#define UART_TX_PIN  43
+#define BAUD_RATE    115200
+#define MAX_NAME     128
+#define MAX_LINE     200
+#define SYNC_DIR "/sync"
+
+HardwareSerial DockSerial(1);
+
 const int NUM_POINTS = 11;
 const float lipoVoltages[NUM_POINTS]   = {3.27, 3.60, 3.70, 3.76, 3.79, 3.82, 3.87, 3.92, 3.98, 4.06, 4.20};
 const int lipoPercentages[NUM_POINTS]  = {0,    10,   20,   30,   40,   50,   60,   70,   80,   90,   100};
@@ -143,61 +153,370 @@ String listMenu[4] = {
 String currentDirectory = "/sync/";
 bool finishedDirectory = false;
 
-#line 145 "/home/cheeto/Arduino/flippy/flippy.ino"
+
+// SYNCING
+
+#line 158 "/home/cheeto/Arduino/flippy/flippy.ino"
+void startSync();
+#line 261 "/home/cheeto/Arduino/flippy/flippy.ino"
+uint32_t crc32Update(uint32_t crc, uint8_t data);
+#line 269 "/home/cheeto/Arduino/flippy/flippy.ino"
+bool validName(const String &name);
+#line 285 "/home/cheeto/Arduino/flippy/flippy.ino"
+bool readLine(String &line);
+#line 305 "/home/cheeto/Arduino/flippy/flippy.ino"
+uint32_t fileCRC(File &file);
+#line 313 "/home/cheeto/Arduino/flippy/flippy.ino"
+String hex32(uint32_t value);
+#line 319 "/home/cheeto/Arduino/flippy/flippy.ino"
+void listFiles();
+#line 348 "/home/cheeto/Arduino/flippy/flippy.ino"
+void handlePut(String name, uint32_t size, uint32_t expectedCRC);
+#line 414 "/home/cheeto/Arduino/flippy/flippy.ino"
+void handleGet(String name);
+#line 446 "/home/cheeto/Arduino/flippy/flippy.ino"
 bool loadFlashcards(const String& folderPath);
-#line 168 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 469 "/home/cheeto/Arduino/flippy/flippy.ino"
 void scanDirectory(const String& path);
-#line 219 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 520 "/home/cheeto/Arduino/flippy/flippy.ino"
 void parseMarkdownFile(File file);
-#line 260 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 561 "/home/cheeto/Arduino/flippy/flippy.ino"
 String trimString(String text);
-#line 265 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 566 "/home/cheeto/Arduino/flippy/flippy.ino"
 void goUpDirectory(String* path);
-#line 271 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 572 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setListMenuToDir(String dirname);
-#line 322 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 623 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawFlashcard();
-#line 346 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 644 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawListMenu();
-#line 376 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 669 "/home/cheeto/Arduino/flippy/flippy.ino"
 Menu getMenu(int id);
-#line 384 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 677 "/home/cheeto/Arduino/flippy/flippy.ino"
 void printInBox(String text, int x, int y, int w, int h);
-#line 452 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 745 "/home/cheeto/Arduino/flippy/flippy.ino"
 char * menuToPath();
-#line 456 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 749 "/home/cheeto/Arduino/flippy/flippy.ino"
 void handleMenuButton(int button);
-#line 538 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 837 "/home/cheeto/Arduino/flippy/flippy.ino"
 void readFile(fs::FS &fs, const char *path);
-#line 553 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 852 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawBinaryImage(const char* filename, int16_t x, int16_t y, uint16_t w, uint16_t h);
-#line 570 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 869 "/home/cheeto/Arduino/flippy/flippy.ino"
 int readBattery();
-#line 611 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 910 "/home/cheeto/Arduino/flippy/flippy.ino"
 void leveledRefresh(int refreshLevel);
-#line 632 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 927 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawCornerStats();
-#line 657 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 937 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setup();
-#line 738 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1010 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setRTCToCompileTime();
-#line 785 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1057 "/home/cheeto/Arduino/flippy/flippy.ino"
 uint8_t decToBcd(uint8_t val);
-#line 789 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1061 "/home/cheeto/Arduino/flippy/flippy.ino"
 uint8_t bcdToDec(uint8_t bcd);
-#line 793 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1065 "/home/cheeto/Arduino/flippy/flippy.ino"
 long long concat(long long a, long long b);
-#line 810 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1082 "/home/cheeto/Arduino/flippy/flippy.ino"
 void updateTime();
-#line 830 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1102 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawTest();
-#line 859 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1131 "/home/cheeto/Arduino/flippy/flippy.ino"
 void lightSleep();
-#line 893 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1165 "/home/cheeto/Arduino/flippy/flippy.ino"
 void deepSleep();
-#line 913 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1185 "/home/cheeto/Arduino/flippy/flippy.ino"
 void loop();
-#line 145 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 158 "/home/cheeto/Arduino/flippy/flippy.ino"
+void startSync() {
+	display.setPartialWindow(0, 0, 200, 25);
+
+	display.firstPage();
+	do {
+		display.fillRect(0, 0, 200, 25, GxEPD_BLACK);
+	} while (display.nextPage());
+
+	display.firstPage();
+	do {
+		display.fillRect(0, 0, 200, 25, GxEPD_WHITE);
+		display.setFont(&Lora_Italic_VariableFont_wght10pt7b);
+		display.setCursor(0, 20);
+		display.print("Syncing...");
+	} while (display.nextPage());
+
+	DockSerial.begin(
+		BAUD_RATE,
+		SERIAL_8N1,
+		UART_RX_PIN,
+		UART_TX_PIN
+	);
+
+	if (!SD.exists(SYNC_DIR)) {
+		if (!SD.mkdir(SYNC_DIR)) {
+		DockSerial.println("ERR MKDIR");
+		return;
+		}
+	}
+
+	DockSerial.println("READY");
+
+	while (digitalRead(B3_PIN) == LOW) {
+		delay(100);
+	}
+
+	while (digitalRead(B3_PIN) == HIGH) { // sync until B3 is pressed again
+		if (DockSerial.available()) {
+			String line;
+
+			if (!readLine(line)) {
+				DockSerial.println("ERR LINE");
+				break;
+			}
+
+			if (line == "LIST") {
+				listFiles();
+			}
+			else if (line.startsWith("PUT ")) {
+				char name[MAX_NAME];
+				unsigned long size;
+				char crcText[9];
+
+				if (sscanf(line.c_str(), "PUT %127s %lu %8s",
+						name, &size, crcText) == 3) {
+				uint32_t crc = strtoul(crcText, nullptr, 16);
+				handlePut(String(name), size, crc);
+				} else {
+				DockSerial.println("ERR FORMAT");
+				}
+			}
+			else if (line.startsWith("GET ")) {
+				String name = line.substring(4);
+				handleGet(name);
+			} else if (line.startsWith("DELETE ")) {
+				String name = line.substring(7);
+
+				if (!validName(name)) {
+					DockSerial.println("ERR NAME");
+				} else {
+					String path = String(SYNC_DIR) + "/" + name;
+
+					if (SD.exists(path)) {
+					if (SD.remove(path)) {
+						DockSerial.println("OK");
+					} else {
+						DockSerial.println("ERR DELETE");
+					}
+					} else {
+					DockSerial.println("OK");
+					}
+				}
+			} else if (line == "FINISH") {
+				break;
+			} else {
+				DockSerial.println("ERR COMMAND");
+			}
+		}
+	}
+
+	DockSerial.println("ACKFINISH");
+	DockSerial.flush();
+	DockSerial.end();
+
+	display.firstPage();
+	do {
+		display.print(" Done!");
+	} while (display.nextPage());
+
+	delay(1000);
+}
+
+// CRC-32 (IEEE)
+uint32_t crc32Update(uint32_t crc, uint8_t data) {
+  crc ^= data;
+  for (int i = 0; i < 8; i++) {
+    crc = (crc >> 1) ^ (0xEDB88320UL & -(crc & 1));
+  }
+  return crc;
+}
+
+bool validName(const String &name) {
+  if (name.length() == 0 || name.length() >= MAX_NAME)
+    return false;
+
+  if (name == "." || name == "..")
+    return false;
+
+  // Only flat filenames; no directory traversal
+  for (char c : name) {
+    if (c == '/' || c == '\\' || c == ':' ||
+        c == '\r' || c == '\n')
+      return false;
+  }
+  return true;
+}
+
+bool readLine(String &line) {
+  line = "";
+  while (true) {
+    if (!DockSerial.available()) {
+      delay(1);
+      continue;
+    }
+
+    char c = DockSerial.read();
+    if (c == '\n')
+      return true;
+
+    if (c != '\r') {
+      if (line.length() >= MAX_LINE)
+        return false;
+      line += c;
+    }
+  }
+}
+
+uint32_t fileCRC(File &file) {
+  uint32_t crc = 0xFFFFFFFF;
+  while (file.available()) {
+    crc = crc32Update(crc, file.read());
+  }
+  return crc ^ 0xFFFFFFFF;
+}
+
+String hex32(uint32_t value) {
+  char buf[9];
+  snprintf(buf, sizeof(buf), "%08lX", (unsigned long)value);
+  return String(buf);
+}
+
+void listFiles() {
+  File root = SD.open(SYNC_DIR);
+  if (!root) {
+    DockSerial.println("ERR SD");
+    return;
+  }
+
+  File entry = root.openNextFile();
+  while (entry) {
+    if (!entry.isDirectory()) {
+      String name = String(entry.name());
+      if (validName(name)) {
+        uint32_t size = entry.size();
+        uint32_t crc = fileCRC(entry);
+
+        DockSerial.printf("FILE %s %lu %s\n",
+          name.c_str(),
+          (unsigned long)size,
+          hex32(crc).c_str());
+      }
+    }
+    entry.close();
+    entry = root.openNextFile();
+  }
+
+  root.close();
+  DockSerial.println("END");
+}
+
+void handlePut(String name, uint32_t size, uint32_t expectedCRC) {
+  if (!validName(name)) {
+    DockSerial.println("ERR NAME");
+    return;
+  }
+
+  String tempName = String(SYNC_DIR) + "/" + name + ".part";
+  String finalName = String(SYNC_DIR) + "/" + name;
+
+  SD.remove(tempName);
+
+  File file = SD.open(tempName, FILE_WRITE);
+  if (!file) {
+    DockSerial.println("ERR OPEN");
+    return;
+  }
+
+  DockSerial.println("GO");
+
+  uint32_t crc = 0xFFFFFFFF;
+  uint32_t received = 0;
+  uint8_t buffer[512];
+
+  while (received < size) {
+    size_t wanted = min((uint32_t)sizeof(buffer), size - received);
+
+    size_t count = 0;
+    while (count < wanted) {
+      if (DockSerial.available()) {
+        int c = DockSerial.read();
+        if (c >= 0)
+          buffer[count++] = (uint8_t)c;
+      } else {
+        delay(1);
+      }
+    }
+
+    file.write(buffer, count);
+
+    for (size_t i = 0; i < count; i++)
+      crc = crc32Update(crc, buffer[i]);
+
+    received += count;
+  }
+
+  file.flush();
+  file.close();
+
+  crc ^= 0xFFFFFFFF;
+
+  if (crc != expectedCRC) {
+    SD.remove(tempName);
+    DockSerial.println("ERR CRC");
+    return;
+  }
+
+  SD.remove(finalName);
+  if (!SD.rename(tempName, finalName)) {
+    SD.remove(tempName);
+    DockSerial.println("ERR RENAME");
+    return;
+  }
+
+  DockSerial.println("OK");
+}
+
+void handleGet(String name) {
+  if (!validName(name)) {
+    DockSerial.println("ERR NAME");
+    return;
+  }
+
+  File file = SD.open(String(SYNC_DIR) + "/" + name, FILE_READ);
+  if (!file) {
+    DockSerial.println("ERR NOTFOUND");
+    return;
+  }
+
+  uint32_t size = file.size();
+  uint32_t crc = fileCRC(file);
+  file.seek(0);
+
+  DockSerial.printf("DATA %lu %s\n",
+    (unsigned long)size,
+    hex32(crc).c_str());
+
+  uint8_t buffer[512];
+  while (file.available()) {
+    size_t count = file.read(buffer, sizeof(buffer));
+    DockSerial.write(buffer, count);
+  }
+
+  file.close();
+}
+
+// END OF SYNCING
+
+
 bool loadFlashcards(const String& folderPath) {
     flashcardCount = 0;
 
@@ -378,25 +697,22 @@ void setListMenuToDir(String dirname) {
 void drawFlashcard() {
 	display.setPartialWindow(0, 0, display.width(), display.height());
 
-	display.firstPage();
-	do {
-		
-		display.setTextColor(GxEPD_BLACK);
-		drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
+	display.setTextColor(GxEPD_BLACK);
+	display.fillScreen(1);
+	drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
 
-		display.setFont(&Lora_Italic_VariableFont_wght7pt7b);
-		printInBox(currentDirectory + " | Q" + String(menuIndex), 10, 20, 365, 30);
+	display.setFont(&Lora_Italic_VariableFont_wght7pt7b);
+	printInBox(currentDirectory + " | Q" + String(menuIndex), 10, 20, 365, 30);
 
-		display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
-		if (currentMenu == 6) {
-            //display.print(flashcards[menuIndex].question);
-			printInBox(flashcards[menuIndex].question, 10, 50, 365, 140);
-        } else {
-            printInBox(flashcards[menuIndex].answer, 10, 50, 365, 140);
-        }
-	} while (display.nextPage());
+	display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
+	if (currentMenu == 6) {
+		//display.print(flashcards[menuIndex].question);
+		printInBox(flashcards[menuIndex].question, 10, 50, 365, 140);
+	} else {
+		printInBox(flashcards[menuIndex].answer, 10, 50, 365, 140);
+	}
 
-	Serial.println(flashcards[menuIndex].question);
+	display.display(true);
 }
 
 void drawListMenu() {
@@ -412,21 +728,16 @@ void drawListMenu() {
             display.width(),
             display.height()
         );
+
+		// Draw menu text
+		for (int i = 0; i < 4; i++) {
+			const int y = 50 + 60 * i;
+			const int windowY = 9 + 60 * i;
+
+			display.setCursor(44, y);
+			display.print(listMenu[i]);
+		}
     } while (display.nextPage());
-
-    // Draw menu text
-    for (int i = 0; i < 4; i++) {
-        const int y = 50 + 60 * i;
-        const int windowY = 9 + 60 * i;
-
-        display.setPartialWindow(43, windowY, 281, 42);
-        display.firstPage();
-        do {
-            display.fillRect(43, windowY, 281, 42, GxEPD_WHITE);
-            display.setCursor(44, y);
-            display.print(listMenu[i]);
-        } while (display.nextPage());
-    }
 }
 
 Menu getMenu(int id) {
@@ -547,7 +858,7 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
 				menuIndex = 0;
 		}
 	} else if (m.flashcard) { // is a flashcard menu
-
+		refreshLevel = 2;
 		switch(m.id) { // this is dumb as fuck but i cant be bothered to do anything else <3
 			case 6: // whether this is the question side
 				switch(button) { // im crine theres another switch statement
@@ -557,6 +868,7 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
 					case 2: // hint button (not implemented yet)
 						break;
 					case 4: // home button
+						refreshLevel = 3;
 						currentMenu = 1;
 						menuIndex = 0;
 						break;
@@ -585,13 +897,18 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
 
 	} else {
 		currentMenu = getMenu(currentMenu).linkedMenus[button - 1];
+
+		if (currentMenu == 4) {
+			startSync();
+			currentMenu = 1; // return to main menu
+		}
 	}
 
 	Serial.print("it is now ");
 	Serial.println(currentMenu);
 }
 
-void readFile(fs::FS &fs, const char *path){
+void readFile(fs::FS &fs, const char *path) {
 	Serial.printf("reading file: %s\n", path);
 	File file = fs.open(path);
 	if(!file){
@@ -664,50 +981,31 @@ int readBattery() { // scuffed battery voltage read + convert to percentage. no 
   return 0;
 }
 
-void leveledRefresh(int refreshLevel) {  // custom screen refresh to bypass seizure-inducing
-	display.firstPage();				 // refresh built into display controller
-	do {
-		display.fillScreen(GxEPD_WHITE);
-	} while (display.nextPage());
+void leveledRefresh(int refreshLevel) {  // version 2 no paging
+	if (refreshLevel == 0) {
+		return;
+	}
+	display.fillScreen(GxEPD_WHITE);
+	display.display(true);
 
 	if (refreshLevel > 1) {
-		display.firstPage();
-		do {
-			display.fillScreen(GxEPD_BLACK);
-		} while (display.nextPage());
-
+		display.fillScreen(GxEPD_BLACK);
+		display.display(true);
 		if (refreshLevel > 2) {
-			display.firstPage();
-			do {
-				display.fillScreen(GxEPD_WHITE);
-			} while (display.nextPage());
+			display.fillScreen(GxEPD_WHITE);
+			display.display(true);
 		}
 	}
 }
 
 void drawCornerStats() {
-	display.setPartialWindow(381, 0, 35, 64);
+	display.setFont(&Lora_Italic_VariableFont_wght7pt7b);
+	display.setCursor(381, 15);
+	display.print(String(hour) + ":" + String(minute));
 
-	display.firstPage();
-
-	do {
-		// clear all previous info drawn
-		display.fillScreen(GxEPD_WHITE);
-	} while (display.nextPage());	
-	display.firstPage();
-	do {
-		// time
-		display.setFont(&Lora_Italic_VariableFont_wght7pt7b);
-		display.setCursor(381, 15);
-		display.print(String(hour) + ":" + String(minute));
-
-		// battery
-		display.setCursor(381, 30);
-		display.print(String(batteryPercentage) + "%");
-	} while (display.nextPage());
-
-	// return partial window to entire display
-	display.setPartialWindow(0, 0, display.width(), display.height());
+	// battery
+	display.setCursor(381, 30);
+	display.print(String(batteryPercentage) + "%");
 }
 
 void setup()
@@ -716,6 +1014,7 @@ void setup()
 		Serial.begin(115200);
 		delay(500);
 	}
+
 	Serial.println("began serial wheyyy");
 	// init buttons
 	rtc_gpio_deinit(deepWakePin);
@@ -748,12 +1047,12 @@ void setup()
 
 	uint8_t cardType = SD.cardType();
 	if(cardType == CARD_NONE){
-		Serial.println("omg did you forget to plug the card in (or spi isnt working ig)");
+		Serial.println("did you forget to plug the card in (or spi isnt working ig)");
 	}
 
 	Serial.println("initing sd card...");
 	if (!SD.begin(SD_CS)) {
-		Serial.println("oopsie sd card init failed lololololollol");
+		Serial.println("sd card init failed lololololollol");
 	}
 
 	esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
@@ -763,27 +1062,18 @@ void setup()
 
 	display.setPartialWindow(0, 0, display.width(), display.height());
 
-	display.firstPage();
-	do {
-		display.fillScreen(GxEPD_WHITE);
-	} while (display.nextPage());
+	display.fillScreen(GxEPD_WHITE);
+	display.display(true);
 
-	display.firstPage();
-	do {
-		display.fillScreen(GxEPD_BLACK);
-	} while (display.nextPage());
+	display.fillScreen(GxEPD_BLACK);
+	display.display(true);
 
-	display.firstPage();
-	do {
-		display.fillScreen(GxEPD_WHITE);
-	} while (display.nextPage());
+	display.fillScreen(GxEPD_WHITE);
+	display.display(true);
 
-	display.firstPage();
-	do {
-		drawBinaryImage("/assets/mainmenu/mainmenu.bin", 0, 0, display.width(), display.height());
-	} while (display.nextPage());
-
+	drawBinaryImage("/assets/mainmenu/mainmenu.bin", 0, 0, display.width(), display.height());
 	drawCornerStats();
+	display.display(true);
 
 	setListMenuToDir("/sync/");
 
@@ -1013,6 +1303,11 @@ void loop() {
 					pressedPin = (int)pin;
 					Serial.print("pressed pin is ");
 					Serial.println(pin);
+					int timeout = 0;
+					while (digitalRead((uint8_t)pin) == LOW && timeout < 20) {
+						delay(50);
+						timeout += 1;
+					}
 				} else {
 					secondPin = (int)pin; // if we have found a first pressed button
 					Serial.print("second pin is ");
@@ -1079,21 +1374,18 @@ void loop() {
 	Menu m = getMenu(currentMenu);
 
 	if (!m.listMenu && !m.flashcard) {
-		display.firstPage();
-		do {
-			drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
-			
-			if (m.drawTopLeftBattery) {
-				display.setCursor(0, 74);
-				display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
-				display.print(String(batteryPercentage) + "%");
-			}
-
-		} while (display.nextPage());
+		drawBinaryImage(menuToPath(), 0, 0, display.width(), display.height());
+		
+		if (m.drawTopLeftBattery) {
+			display.setCursor(0, 74);
+			display.setFont(&Lora_Italic_VariableFont_wght15pt7b);
+			display.print(String(batteryPercentage) + "%");
+		}
 
 		if (m.drawCornerStats) {
 			drawCornerStats();
 		}
+		display.display(true);
 	} else if (!m.flashcard) { // menu is a listMenu so requires special handling
 		setListMenuToDir(currentDirectory);
 		drawListMenu();
