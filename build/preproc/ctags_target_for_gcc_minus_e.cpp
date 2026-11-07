@@ -111,9 +111,9 @@ int buttons[] = {
 
 Menu menus[] = {
  {0, "/assets/sleeping/sleeping.bin", {0, 0, 0, 0}, false, true, false, false}, // 0 sleep menu
- {1, "/assets/mainmenu/mainmenu.bin", {2, 3, 4, 5}, true, false, false, false}, // 1 main menu
+ {1, "/assets/mainmenu/mainmenu.bin", {2, 404, 4, 404}, true, false, false, false}, // 1 main menu
 
- {2, "/assets/revise/revise.bin", {1, 22, 1, 1}, true, false, false, false}, // 2 revise menu
+ {2, "/assets/revise/revise.bin", {404, 22, 1, 1}, true, false, false, false}, // 2 revise menu
  {22, "/assets/general/listmenu.bin", {0,0,0,0}, true, false, true, false}, // 2.2 revise->browse
 
  {3, "/assets/read/read.bin", {1, 1, 1, 1}, true, false, false, false}, // 3 read menu
@@ -121,6 +121,8 @@ Menu menus[] = {
  {5, "/assets/settings/settings.bin", {1, 1, 1, 1}, true, false, false, false}, // 5 settings menu
  {6, "/assets/general/flashcardQuestion.bin", {0,0,0,0}, false, false, false, true}, // 6 flashcard question side
  {7, "/assets/general/flashcardAnswer.bin", {0,0,0,0}, false, false, false, true}, // 7 flashcard answer side
+
+ {404, "/assets/general/error.bin", {1, 1, 1, 1}, false, false, false, false}, // 404 error screen
 };
 
 int menuCount = sizeof(menus) / sizeof(menus[0]);
@@ -141,7 +143,7 @@ int menuIndex = 0;
 int currentMenu = 1; // 0 = SLEEP   1 = MAIN MENU
 int menuLength = 4; // not used currently
 
-int refreshLevel = 3;
+int refreshLevel = 2;
 
 String listMenu[4] = {
  "back",
@@ -150,7 +152,8 @@ String listMenu[4] = {
  "down"
 };
 
-String currentDirectory = "/sync/";
+String favDirectory = "/sync/GCSE/subjects/"; // MUST HAVE A / AT THE END. I WILL GENUINELY FIND AND KILL YOU IF YOU DONT PUT IT THERE. <<<333
+String currentDirectory = favDirectory;
 bool finishedDirectory = false;
 
 
@@ -179,8 +182,8 @@ void startSync() {
   43
  );
 
- if (!SD.exists("/sync")) {
-  if (!SD.mkdir("/sync")) {
+ if (!SD.exists("/sync/")) {
+  if (!SD.mkdir("/sync/")) {
   DockSerial.println("ERR MKDIR");
   return;
   }
@@ -226,7 +229,7 @@ void startSync() {
     if (!validName(name)) {
      DockSerial.println("ERR NAME");
     } else {
-     String path = String("/sync") + "/" + name;
+     String path = String("/sync/") + "/" + name;
 
      if (SD.exists(path)) {
      if (SD.remove(path)) {
@@ -252,7 +255,8 @@ void startSync() {
 
  display.firstPage();
  do {
-  display.print(" Done!");
+  display.setCursor(0, 20);
+  display.print("Syncing... Done!");
  } while (display.nextPage());
 
  delay(1000);
@@ -318,7 +322,7 @@ String hex32(uint32_t value) {
 }
 
 void listFiles() {
-  File root = SD.open("/sync");
+  File root = SD.open("/sync/");
   if (!root) {
     DockSerial.println("ERR SD");
     return;
@@ -352,8 +356,8 @@ void handlePut(String name, uint32_t size, uint32_t expectedCRC) {
     return;
   }
 
-  String tempName = String("/sync") + "/" + name + ".part";
-  String finalName = String("/sync") + "/" + name;
+  String tempName = String("/sync/") + "/" + name + ".part";
+  String finalName = String("/sync/") + "/" + name;
 
   SD.remove(tempName);
 
@@ -418,7 +422,7 @@ void handleGet(String name) {
     return;
   }
 
-  File file = SD.open(String("/sync") + "/" + name, "r");
+  File file = SD.open(String("/sync/") + "/" + name, "r");
   if (!file) {
     DockSerial.println("ERR NOTFOUND");
     return;
@@ -664,6 +668,8 @@ void drawListMenu() {
    display.setCursor(44, y);
    display.print(listMenu[i]);
   }
+
+  drawCornerStats();
     } while (display.nextPage());
 }
 
@@ -747,6 +753,20 @@ char* menuToPath() {
  return getMenu(currentMenu).imgPath;
 }
 
+void openDirOrLoadCard(int index) {
+ currentDirectory = currentDirectory + listMenu[index] + "/";
+ File markdownFile = SD.open(currentDirectory.c_str(), "r");
+
+ if (!markdownFile.isDirectory() && markdownFile) {
+  flashcardCount = 0;
+  parseMarkdownFile(markdownFile);
+  currentMenu = 6;
+ }
+
+ markdownFile.close();
+ menuIndex = 0;
+}
+
 void handleMenuButton(int button) { // big boy function (for big boys only)
  HWCDCSerial.print("current menu was ");
  HWCDCSerial.println(currentMenu);
@@ -767,22 +787,26 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
     }
     break;
    case 2:
-    currentDirectory = currentDirectory + listMenu[1] + "/";
-    menuIndex = 0;
+    openDirOrLoadCard(1);
     break;
    case 3:
-    currentDirectory = currentDirectory + listMenu[2] + "/";
-    menuIndex = 0;
+    openDirOrLoadCard(2);
     break;
    case 4:
     if (listMenu[3] == "down") {
      menuIndex += 2;
     }
     break;
-   case 43: // LMAO this is so fucked. 43 means both button 4 and 3 is pressed
+   case 21: // LMAO this is so fucked. 21 means both button 2 and 1 is pressed. 21 = home shortcut
+    currentMenu = 1;
+    menuIndex = 0;
+    currentDirectory = favDirectory;
+    break;
+   case 43:
     loadFlashcards(currentDirectory);
     currentMenu = 6;
     menuIndex = 0;
+    break;
   }
  } else if (m.flashcard) { // is a flashcard menu
   refreshLevel = 2;
@@ -795,9 +819,10 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
      case 2: // hint button (not implemented yet)
       break;
      case 4: // home button
-      refreshLevel = 3;
+      refreshLevel = 2;
       currentMenu = 1;
       menuIndex = 0;
+      currentDirectory = favDirectory;
       break;
     }
     break;
@@ -1014,10 +1039,10 @@ void setRTCToCompileTime() {
  int hour, minute, second;
 
  // Parse compile date, e.g. "Oct 21 2026"
- sscanf("Nov  1 2026", "%3s %d %d", monthStr, &day, &year);
+ sscanf("Nov  7 2026", "%3s %d %d", monthStr, &day, &year);
 
  // Parse compile time, e.g. "17:57:00"
- sscanf("14:24:57", "%d:%d:%d", &hour, &minute, &second);
+ sscanf("11:54:43", "%d:%d:%d", &hour, &minute, &second);
 
  const char* months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -1137,26 +1162,26 @@ void lightSleep() {
 
  // Enable wake-up when any pin goes LOW
  for (gpio_num_t pin : wakePins) {
-  do { esp_err_t err_rc_ = (gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1139, 
-# 1139 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+  do { esp_err_t err_rc_ = (gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1164, 
+# 1164 "/home/cheeto/Arduino/flippy/flippy.ino" 3
  __PRETTY_FUNCTION__
-# 1139 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 1164 "/home/cheeto/Arduino/flippy/flippy.ino"
  , "gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)"); } } while(0)
 
    ;
  }
 
- do { esp_err_t err_rc_ = (esp_sleep_enable_gpio_wakeup()); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1144, 
-# 1144 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_gpio_wakeup()); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1169, 
+# 1169 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 1144 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 1169 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_gpio_wakeup()"); } } while(0);
 
  // Also wake after five minutes
- do { esp_err_t err_rc_ = (esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1147, 
-# 1147 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1172, 
+# 1172 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 1147 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 1172 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_timer_wakeup(SLEEP_TIME_US)"); } } while(0)
 
   ;
@@ -1190,10 +1215,10 @@ void deepSleep() {
  rtc_gpio_pulldown_dis(deepWakePin);
 
  // Wake when the pin is LOW
- do { esp_err_t err_rc_ = (esp_sleep_enable_ext0_wakeup(deepWakePin, 0)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1180, 
-# 1180 "/home/cheeto/Arduino/flippy/flippy.ino" 3
+ do { esp_err_t err_rc_ = (esp_sleep_enable_ext0_wakeup(deepWakePin, 0)); if ((err_rc_ != 0 /*!< esp_err_t value indicating success (no error) */)) { _esp_error_check_failed(err_rc_, "/home/cheeto/Arduino/flippy/flippy.ino", 1205, 
+# 1205 "/home/cheeto/Arduino/flippy/flippy.ino" 3
 __PRETTY_FUNCTION__
-# 1180 "/home/cheeto/Arduino/flippy/flippy.ino"
+# 1205 "/home/cheeto/Arduino/flippy/flippy.ino"
 , "esp_sleep_enable_ext0_wakeup(deepWakePin, 0)"); } } while(0);
  esp_deep_sleep_start();
  // program never continues from here as deep sleep does not preserve RAM
@@ -1236,45 +1261,20 @@ void loop() {
  delay(100); // to allow time for multi button presses
 
  if (buttonPressed) {
-  int pressedPin = 0;
-  int secondPin = 0;
-
-  // Print which pins are LOW after waking
-  for (gpio_num_t pin : wakePins) {
-   if (digitalRead((uint8_t)pin) == 0x0) {
-    if (pressedPin == 0) { // if we have not found the first pressed button yet
-     pressedPin = (int)pin;
-     HWCDCSerial.print("pressed pin is ");
-     HWCDCSerial.println(pin);
-     int timeout = 0;
-     while (digitalRead((uint8_t)pin) == 0x0 && timeout < 20) {
-      delay(50);
-      timeout += 1;
-     }
-    } else {
-     secondPin = (int)pin; // if we have found a first pressed button
-     HWCDCSerial.print("second pin is ");
-     HWCDCSerial.println(pin);
-    }
-
+  // Read every button after the settling delay, without blocking on the
+  // first one; encode multiple buttons in descending order (e.g. 2+1 => 21).
+  int pressedButton = -1;
+  for (int i = 4; i >= 1; i--) {
+   if (digitalRead(buttons[i]) == 0x0) {
+    pressedButton = pressedButton == -1
+     ? i
+     : concat(pressedButton, i);
    }
   }
 
-  int pressedButton = -1; // when multiple buttons are pressed, the button read will be the bigger number button before the smaller one. eg 32 for 3 and 2, 43 for 4 and 3.
-  int secondButton = -1;
-
-  for (int i = 0; i < 6; i++) {
-   if (pressedPin == buttons[i]) {
-    pressedButton = i;
-   } else if (secondPin == buttons [i]) {
-    secondButton = i;
-   }
-  }
-
-  if (secondButton != -1) {
-   HWCDCSerial.println("second button pressed");
-
-   pressedButton = concat(pressedButton, secondButton);
+  // Preserve the power-button behavior when it is the only pressed button.
+  if (pressedButton == -1 && digitalRead(1) == 0x0) {
+   pressedButton = 0;
   }
 
   if (pressedButton == 0) { // power button
@@ -1300,7 +1300,7 @@ void loop() {
   HWCDCSerial.println("going to sleep due to timer");
   menuIndex = 0;
   currentMenu = 0;
-  refreshLevel = 3;
+  refreshLevel = 2;
   shouldLightSleep = false;
  }
 

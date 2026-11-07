@@ -61,7 +61,7 @@ const bool DEBUG = false; // whether to do debug serial and stuff. will make eve
 #define BAUD_RATE    115200
 #define MAX_NAME     128
 #define MAX_LINE     200
-#define SYNC_DIR "/sync"
+#define SYNC_DIR "/sync/"
 
 HardwareSerial DockSerial(1);
 
@@ -111,9 +111,9 @@ int buttons[] = {
 
 Menu menus[] = {
 	{0, "/assets/sleeping/sleeping.bin", {0, 0, 0, 0}, false, true, false, false},  // 0 sleep menu
-	{1, "/assets/mainmenu/mainmenu.bin", {2, 3, 4, 5}, true, false, false, false}, // 1 main menu
+	{1, "/assets/mainmenu/mainmenu.bin", {2, 404, 4, 404}, true, false, false, false}, // 1 main menu
 
-	{2, "/assets/revise/revise.bin", {1, 22, 1, 1}, true, false, false, false}, // 2 revise menu
+	{2, "/assets/revise/revise.bin", {404, 22, 1, 1}, true, false, false, false}, // 2 revise menu
 	{22, "/assets/general/listmenu.bin", {0,0,0,0}, true, false, true, false}, // 2.2 revise->browse
 
 	{3, "/assets/read/read.bin", {1, 1, 1, 1}, true, false, false, false}, // 3 read menu
@@ -121,6 +121,8 @@ Menu menus[] = {
 	{5, "/assets/settings/settings.bin", {1, 1, 1, 1}, true, false, false, false}, // 5 settings menu
 	{6, "/assets/general/flashcardQuestion.bin", {0,0,0,0}, false, false, false, true}, // 6 flashcard question side
 	{7, "/assets/general/flashcardAnswer.bin", {0,0,0,0}, false, false, false, true}, // 7 flashcard answer side
+
+	{404, "/assets/general/error.bin", {1, 1, 1, 1}, false, false, false, false}, // 404 error screen
 };
 
 int menuCount = sizeof(menus) / sizeof(menus[0]);
@@ -141,7 +143,7 @@ int menuIndex = 0;
 int currentMenu = 1;  // 0 = SLEEP   1 = MAIN MENU
 int menuLength = 4; // not used currently
 
-int refreshLevel = 3;
+int refreshLevel = 2;
 
 String listMenu[4] = {
 	"back",
@@ -150,85 +152,88 @@ String listMenu[4] = {
 	"down"
 };
 
-String currentDirectory = "/sync/";
+String favDirectory = "/sync/GCSE/subjects/"; // MUST HAVE A / AT THE END. I WILL GENUINELY FIND AND KILL YOU IF YOU DONT PUT IT THERE. <<<333
+String currentDirectory = favDirectory; 
 bool finishedDirectory = false;
 
 
 // SYNCING
 
-#line 158 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 161 "/home/cheeto/Arduino/flippy/flippy.ino"
 void startSync();
-#line 261 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 265 "/home/cheeto/Arduino/flippy/flippy.ino"
 uint32_t crc32Update(uint32_t crc, uint8_t data);
-#line 269 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 273 "/home/cheeto/Arduino/flippy/flippy.ino"
 bool validName(const String &name);
-#line 285 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 289 "/home/cheeto/Arduino/flippy/flippy.ino"
 bool readLine(String &line);
-#line 305 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 309 "/home/cheeto/Arduino/flippy/flippy.ino"
 uint32_t fileCRC(File &file);
-#line 313 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 317 "/home/cheeto/Arduino/flippy/flippy.ino"
 String hex32(uint32_t value);
-#line 319 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 323 "/home/cheeto/Arduino/flippy/flippy.ino"
 void listFiles();
-#line 348 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 352 "/home/cheeto/Arduino/flippy/flippy.ino"
 void handlePut(String name, uint32_t size, uint32_t expectedCRC);
-#line 414 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 418 "/home/cheeto/Arduino/flippy/flippy.ino"
 void handleGet(String name);
-#line 446 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 450 "/home/cheeto/Arduino/flippy/flippy.ino"
 bool loadFlashcards(const String& folderPath);
-#line 469 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 473 "/home/cheeto/Arduino/flippy/flippy.ino"
 void scanDirectory(const String& path);
-#line 520 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 524 "/home/cheeto/Arduino/flippy/flippy.ino"
 void parseMarkdownFile(File file);
-#line 561 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 565 "/home/cheeto/Arduino/flippy/flippy.ino"
 String trimString(String text);
-#line 566 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 570 "/home/cheeto/Arduino/flippy/flippy.ino"
 void goUpDirectory(String* path);
-#line 572 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 576 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setListMenuToDir(String dirname);
-#line 623 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 627 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawFlashcard();
-#line 644 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 648 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawListMenu();
-#line 669 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 675 "/home/cheeto/Arduino/flippy/flippy.ino"
 Menu getMenu(int id);
-#line 677 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 683 "/home/cheeto/Arduino/flippy/flippy.ino"
 void printInBox(String text, int x, int y, int w, int h);
-#line 745 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 751 "/home/cheeto/Arduino/flippy/flippy.ino"
 char * menuToPath();
-#line 749 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 755 "/home/cheeto/Arduino/flippy/flippy.ino"
+void openDirOrLoadCard(int index);
+#line 769 "/home/cheeto/Arduino/flippy/flippy.ino"
 void handleMenuButton(int button);
-#line 837 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 862 "/home/cheeto/Arduino/flippy/flippy.ino"
 void readFile(fs::FS &fs, const char *path);
-#line 852 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 877 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawBinaryImage(const char* filename, int16_t x, int16_t y, uint16_t w, uint16_t h);
-#line 869 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 894 "/home/cheeto/Arduino/flippy/flippy.ino"
 int readBattery();
-#line 910 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 935 "/home/cheeto/Arduino/flippy/flippy.ino"
 void leveledRefresh(int refreshLevel);
-#line 927 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 952 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawCornerStats();
-#line 937 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 962 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setup();
-#line 1010 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1035 "/home/cheeto/Arduino/flippy/flippy.ino"
 void setRTCToCompileTime();
-#line 1057 "/home/cheeto/Arduino/flippy/flippy.ino"
-uint8_t decToBcd(uint8_t val);
-#line 1061 "/home/cheeto/Arduino/flippy/flippy.ino"
-uint8_t bcdToDec(uint8_t bcd);
-#line 1065 "/home/cheeto/Arduino/flippy/flippy.ino"
-long long concat(long long a, long long b);
 #line 1082 "/home/cheeto/Arduino/flippy/flippy.ino"
+uint8_t decToBcd(uint8_t val);
+#line 1086 "/home/cheeto/Arduino/flippy/flippy.ino"
+uint8_t bcdToDec(uint8_t bcd);
+#line 1090 "/home/cheeto/Arduino/flippy/flippy.ino"
+long long concat(long long a, long long b);
+#line 1107 "/home/cheeto/Arduino/flippy/flippy.ino"
 void updateTime();
-#line 1102 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1127 "/home/cheeto/Arduino/flippy/flippy.ino"
 void drawTest();
-#line 1131 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1156 "/home/cheeto/Arduino/flippy/flippy.ino"
 void lightSleep();
-#line 1165 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1190 "/home/cheeto/Arduino/flippy/flippy.ino"
 void deepSleep();
-#line 1185 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 1210 "/home/cheeto/Arduino/flippy/flippy.ino"
 void loop();
-#line 158 "/home/cheeto/Arduino/flippy/flippy.ino"
+#line 161 "/home/cheeto/Arduino/flippy/flippy.ino"
 void startSync() {
 	display.setPartialWindow(0, 0, 200, 25);
 
@@ -325,7 +330,8 @@ void startSync() {
 
 	display.firstPage();
 	do {
-		display.print(" Done!");
+		display.setCursor(0, 20);
+		display.print("Syncing... Done!");
 	} while (display.nextPage());
 
 	delay(1000);
@@ -737,6 +743,8 @@ void drawListMenu() {
 			display.setCursor(44, y);
 			display.print(listMenu[i]);
 		}
+
+		drawCornerStats();
     } while (display.nextPage());
 }
 
@@ -820,6 +828,20 @@ char* menuToPath() {
 	return getMenu(currentMenu).imgPath;
 }
 
+void openDirOrLoadCard(int index) {
+	currentDirectory = currentDirectory + listMenu[index] + "/";
+	File markdownFile = SD.open(currentDirectory.c_str(), FILE_READ);
+	
+	if (!markdownFile.isDirectory() && markdownFile) {
+		flashcardCount = 0;
+		parseMarkdownFile(markdownFile);
+		currentMenu = 6;
+	}
+
+	markdownFile.close();
+	menuIndex = 0;
+}
+
 void handleMenuButton(int button) { // big boy function (for big boys only)
 	Serial.print("current menu was ");
 	Serial.println(currentMenu);
@@ -840,22 +862,26 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
 				}
 				break;
 			case 2:
-				currentDirectory = currentDirectory + listMenu[1] + "/";
-				menuIndex = 0;
+				openDirOrLoadCard(1);
 				break;
 			case 3:
-				currentDirectory = currentDirectory + listMenu[2] + "/";
-				menuIndex = 0;
+				openDirOrLoadCard(2);
 				break;
 			case 4:
 				if (listMenu[3] == "down") {
 					menuIndex += 2;
 				}
 				break;
-			case 43: // LMAO this is so fucked. 43 means both button 4 and 3 is pressed
+			case 21: // LMAO this is so fucked. 21 means both button 2 and 1 is pressed. 21 = home shortcut
+				currentMenu = 1;
+				menuIndex = 0;
+				currentDirectory = favDirectory;
+				break;
+			case 43: 
 				loadFlashcards(currentDirectory);
 				currentMenu = 6;
 				menuIndex = 0;
+				break;
 		}
 	} else if (m.flashcard) { // is a flashcard menu
 		refreshLevel = 2;
@@ -868,9 +894,10 @@ void handleMenuButton(int button) { // big boy function (for big boys only)
 					case 2: // hint button (not implemented yet)
 						break;
 					case 4: // home button
-						refreshLevel = 3;
+						refreshLevel = 2;
 						currentMenu = 1;
 						menuIndex = 0;
+						currentDirectory = favDirectory;
 						break;
 				}
 				break;
@@ -1293,45 +1320,20 @@ void loop() {
 	delay(100); // to allow time for multi button presses
 
 	if (buttonPressed) {
-		int pressedPin = 0;
-		int secondPin = 0;
-
-		// Print which pins are LOW after waking
-		for (gpio_num_t pin : wakePins) {
-			if (digitalRead((uint8_t)pin) == LOW) {
-				if (pressedPin == 0) { // if we have not found the first pressed button yet
-					pressedPin = (int)pin;
-					Serial.print("pressed pin is ");
-					Serial.println(pin);
-					int timeout = 0;
-					while (digitalRead((uint8_t)pin) == LOW && timeout < 20) {
-						delay(50);
-						timeout += 1;
-					}
-				} else {
-					secondPin = (int)pin; // if we have found a first pressed button
-					Serial.print("second pin is ");
-					Serial.println(pin);
-				}
-				
+		// Read every button after the settling delay, without blocking on the
+		// first one; encode multiple buttons in descending order (e.g. 2+1 => 21).
+		int pressedButton = -1;
+		for (int i = 4; i >= 1; i--) {
+			if (digitalRead(buttons[i]) == LOW) {
+				pressedButton = pressedButton == -1
+					? i
+					: concat(pressedButton, i);
 			}
 		}
 
-		int pressedButton = -1; // when multiple buttons are pressed, the button read will be the bigger number button before the smaller one. eg 32 for 3 and 2, 43 for 4 and 3.
-		int secondButton = -1;
-
-		for (int i = 0; i < 6; i++) {
-			if (pressedPin == buttons[i]) {
-				pressedButton = i;
-			} else if (secondPin == buttons [i]) {
-				secondButton = i;
-			}
-		}
-
-		if (secondButton != -1) {
-			Serial.println("second button pressed");
-			
-			pressedButton = concat(pressedButton, secondButton);
+		// Preserve the power-button behavior when it is the only pressed button.
+		if (pressedButton == -1 && digitalRead(PWR_PIN) == LOW) {
+			pressedButton = 0;
 		}
 
 		if (pressedButton == 0) { // power button
@@ -1357,7 +1359,7 @@ void loop() {
 		Serial.println("going to sleep due to timer");
 		menuIndex = 0;
 		currentMenu = 0;
-		refreshLevel = 3;
+		refreshLevel = 2;
 		shouldLightSleep = false;
 	}
 
