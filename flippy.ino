@@ -6,10 +6,10 @@
 #include <Fonts/FreeMonoBold9pt7b.h>
 
 // fonts
-#include <Lora_Italic_VariableFont_wght28pt7b.h>
-#include <Lora_Italic_VariableFont_wght15pt7b.h>
-#include <Lora_Italic_VariableFont_wght10pt7b.h>
-#include <Lora_Italic_VariableFont_wght7pt7b.h>
+#include <fonts/Lora_Italic_VariableFont_wght28pt7b.h>
+#include <fonts/Lora_Italic_VariableFont_wght15pt7b.h>
+#include <fonts/Lora_Italic_VariableFont_wght10pt7b.h>
+#include <fonts/Lora_Italic_VariableFont_wght7pt7b.h>
 
 // esp32 specific
 #include "driver/rtc_io.h"
